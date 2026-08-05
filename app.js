@@ -276,12 +276,10 @@ const dom = {
 
 // Initial Setup
 function initializeApp() {
-  // Load saved configurations
-  state.apiKey = localStorage.getItem('sg_defender_gemini_api_key') || '';
-  if (dom.geminiKeyInput) dom.geminiKeyInput.value = state.apiKey;
-  if (dom.setupGeminiKey) {
-    dom.setupGeminiKey.value = state.apiKey;
-  }
+  // Load saved configurations (Ephemeral Mode: API Key is kept purely in RAM and never stored on disk)
+  state.apiKey = '';
+  if (dom.geminiKeyInput) dom.geminiKeyInput.value = '';
+  if (dom.setupGeminiKey) dom.setupGeminiKey.value = '';
   
   const savedTimer = localStorage.getItem('sg_defender_timer_enabled');
   state.timerEnabled = savedTimer !== 'false';
@@ -386,8 +384,6 @@ function saveSettings() {
     dom.setupGeminiKey.value = state.apiKey;
   }
   state.timerEnabled = dom.timerToggle.checked;
-  
-  localStorage.setItem('sg_defender_gemini_api_key', state.apiKey);
   localStorage.setItem('sg_defender_timer_enabled', state.timerEnabled);
   
   writeTerminalLog(`[SYSTEM] Configuration updated. Timer: ${state.timerEnabled ? 'ENABLED' : 'DISABLED'}.`, 'sys');
@@ -447,7 +443,6 @@ async function onStartGame() {
   }
   
   state.apiKey = keyInput;
-  localStorage.setItem('sg_defender_gemini_api_key', state.apiKey);
   if (dom.geminiKeyInput) dom.geminiKeyInput.value = state.apiKey;
 
   // Set button loading state
