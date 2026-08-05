@@ -2,7 +2,13 @@
 
 A cyberpunk-themed, responsive single-page web application where players defend Singapore from a giant invading monster by answering flashcard questions. Powered by Google's Gemini API for dynamic deck generation on any custom topic, featuring a high-fidelity Lottie loading animation.
 
-![Gameplay Screenshot](screenshot.png)
+![Landing Page Screenshot](screenshot.png)
+
+### 📸 Visual Showcase
+
+| 1. Gemini Lottie Loading Overlay | 2. Interactive Kaiju Battle Stage | 3. Mission Accomplished & Debris Review |
+| :---: | :---: | :---: |
+| ![Gemini Lottie Loading](screenshot_loading.png) | ![Kaiju Battle Arena](screenshot_battle.png) | ![Debris Analysis Review](screenshot_results.png) |
 
 ## Features
 
