@@ -226,6 +226,9 @@ const dom = {
   topicInput: document.getElementById('topic-input'),
   loadingOverlay: document.getElementById('loading-overlay'),
   lottieContainer: document.getElementById('lottie-loading-container'),
+  loadingProgressBar: document.getElementById('loading-progress-fill'),
+  loadingStatusText: document.getElementById('loading-status-text'),
+  loadingEtaText: document.getElementById('loading-eta-text'),
   startBtn: document.getElementById('start-game-btn'),
   settingsBtn: document.getElementById('settings-btn'),
   abortBtn: document.getElementById('abort-btn'),
@@ -461,6 +464,42 @@ async function onStartGame() {
       });
     }
   }
+
+  // Initialize progress bar and dynamic status updates
+  let progress = 0;
+  let remainingSeconds = 4;
+  const totalDuration = 4000; // 4 seconds target
+  const intervalTime = 100; // update every 100ms
+  
+  if (dom.loadingProgressBar) dom.loadingProgressBar.style.width = '0%';
+  if (dom.loadingStatusText) dom.loadingStatusText.textContent = "CONNECTING TO GOOGLE AI STUDIO...";
+  if (dom.loadingEtaText) dom.loadingEtaText.textContent = `ESTIMATED TIME REMAINING: ~${remainingSeconds}s`;
+  
+  const loadingInterval = setInterval(() => {
+    // Fill up to 90% linearly
+    if (progress < 90) {
+      progress += (90 / (totalDuration / intervalTime));
+      if (progress > 90) progress = 90;
+      if (dom.loadingProgressBar) dom.loadingProgressBar.style.width = `${progress}%`;
+      
+      // Update ETA
+      const currentRemaining = Math.max(0, Math.ceil(remainingSeconds - (progress / 90) * remainingSeconds));
+      if (dom.loadingEtaText) dom.loadingEtaText.textContent = `ESTIMATED TIME REMAINING: ~${currentRemaining}s`;
+      
+      // Rotate status messages
+      if (dom.loadingStatusText) {
+        if (progress < 25) {
+          dom.loadingStatusText.textContent = "CONNECTING TO GOOGLE AI STUDIO...";
+        } else if (progress < 60) {
+          dom.loadingStatusText.textContent = "QUERYING GEMINI-3.5-FLASH COGNITIVE CORE...";
+        } else if (progress < 85) {
+          dom.loadingStatusText.textContent = "GENERATING 5 TACTICAL FLASHCARDS...";
+        } else {
+          dom.loadingStatusText.textContent = "VALIDATING STRUCTURED JSON RESPONSE...";
+        }
+      }
+    }
+  }, intervalTime);
   
   writeTerminalLog(`[SYSTEM] Initializing intelligence query for topic: "${customTopic}"...`, 'sys');
   
@@ -468,17 +507,26 @@ async function onStartGame() {
     const generatedDeck = await fetchCustomDeckFromGemini(customTopic);
     if (generatedDeck && generatedDeck.length > 0) {
       state.deck = generatedDeck;
+      
+      // Instantly fill to 100% and show success text
+      clearInterval(loadingInterval);
+      if (dom.loadingProgressBar) dom.loadingProgressBar.style.width = '100%';
+      if (dom.loadingStatusText) dom.loadingStatusText.textContent = "DEPLOYMENT COMPLETE! WEAPONS ARMED.";
+      if (dom.loadingEtaText) dom.loadingEtaText.textContent = "TACTICAL INTERRUPT SUCCESSFUL!";
+      await new Promise(resolve => setTimeout(resolve, 250)); // short delay for visual impact
     } else {
       throw new Error("Invalid deck parsed from server response.");
     }
   } catch (err) {
     console.error(err);
+    clearInterval(loadingInterval);
     writeTerminalLog(`[ERROR] Secure connection failed: ${err.message}. Reverting to SG Trivia preset.`, 'dmg');
     alert(`Failed to generate flashcards from Gemini: ${err.message}. Loading default Singapore Trivia deck instead.`);
     state.deck = PRESETS.singapore.slice(0, 5);
     state.activeTopic = "Singapore Trivia (Fallback)";
     dom.activeTopicDisplay.textContent = state.activeTopic;
   } finally {
+    clearInterval(loadingInterval);
     // Hide and cleanup Lottie
     if (dom.loadingOverlay) dom.loadingOverlay.classList.add('hidden');
     if (state.lottieInstance) {
