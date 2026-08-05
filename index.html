@@ -6,6 +6,7 @@
   <meta name="description" content="Singapore Defender: Defend the island city from a giant monster invasion using correct answers in this interactive cyberpunk flashcard battle game.">
   <title>Singapore Defender - Flashcard Battle Game</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 </head>
 <body>
 
@@ -35,32 +36,13 @@
         <!-- Topic Selection -->
         <div class="form-group">
           <label for="topic-input">Battle Topic / Subject</label>
-          <input type="text" id="topic-input" class="form-input" placeholder="Enter any topic (e.g. Cyber Security, Chemistry, Pop Music, French)..." aria-required="true">
+          <input type="text" id="topic-input" class="form-input" placeholder="e.g. Singlish, Singapore History, F1 Grand Prix..." aria-required="true">
         </div>
 
         <!-- API Key Input -->
         <div class="form-group">
           <label for="setup-gemini-key">Gemini API Key (Required)</label>
           <input type="password" id="setup-gemini-key" class="form-input" placeholder="AIzaSy..." aria-required="true">
-        </div>
-
-        <!-- Presets Selection -->
-        <div class="form-group">
-          <label>Preset Decks (No API Key Required)</label>
-          <div class="presets-grid" role="radiogroup" aria-label="Preset Decks">
-            <div class="preset-card selected" data-preset="singapore" role="radio" aria-checked="true" tabindex="0" id="preset-sg">
-              <h4>SG Trivia</h4>
-              <p>Culture & Landmarks</p>
-            </div>
-            <div class="preset-card" data-preset="space" role="radio" aria-checked="false" tabindex="-1" id="preset-space">
-              <h4>Deep Space</h4>
-              <p>Planets & Cosmos</p>
-            </div>
-            <div class="preset-card" data-preset="webdev" role="radio" aria-checked="false" tabindex="-1" id="preset-webdev">
-              <h4>Web Dev</h4>
-              <p>HTML, CSS & JS</p>
-            </div>
-          </div>
         </div>
 
         <button id="start-game-btn" class="btn btn-magenta" style="padding: 1rem; font-size: 1.1rem; justify-content: center; margin-top: 1rem;">
@@ -332,6 +314,14 @@
     <footer>
       <p>&copy; 2026 Singapore Defense Council. Authorized combat simulation environment.</p>
     </footer>
+  </div>
+
+  <!-- Loading Overlay (Lottie Animation) -->
+  <div id="loading-overlay" class="hidden">
+    <div class="loading-box">
+      <div id="lottie-loading-container"></div>
+      <p class="font-tech" style="color: var(--color-cyan); margin-top: 1.5rem; letter-spacing: 2px; text-align: center;">ANALYZING TOPIC / DEPLOYING DEFENSES...</p>
+    </div>
   </div>
 
   <script src="app.js"></script>

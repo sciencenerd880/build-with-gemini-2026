@@ -1,6 +1,6 @@
 # SG Defender: Flashcard Battle Game
 
-A cyberpunk-themed, responsive single-page web application where players defend Singapore from a giant invading monster by answering flashcard questions. Powered by Google's Gemini API for dynamic deck generation on any custom topic, with zero-setup offline presets available out of the box.
+A cyberpunk-themed, responsive single-page web application where players defend Singapore from a giant invading monster by answering flashcard questions. Powered by Google's Gemini API for dynamic deck generation on any custom topic, featuring a high-fidelity Lottie loading animation.
 
 ![Gameplay Screenshot](screenshot.png)
 

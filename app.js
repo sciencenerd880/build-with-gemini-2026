@@ -211,7 +211,8 @@ let state = {
   answersRecord: [], // logs each answer for review screen [{question, chosen, correct, answer, explanation}]
   questionStartTime: 0,
   apiKey: '',
-  highScores: {}
+  highScores: {},
+  lottieInstance: null
 };
 
 // UI Selectors
@@ -223,7 +224,8 @@ const screens = {
 
 const dom = {
   topicInput: document.getElementById('topic-input'),
-  presets: document.querySelectorAll('.preset-card'),
+  loadingOverlay: document.getElementById('loading-overlay'),
+  lottieContainer: document.getElementById('lottie-loading-container'),
   startBtn: document.getElementById('start-game-btn'),
   settingsBtn: document.getElementById('settings-btn'),
   abortBtn: document.getElementById('abort-btn'),
@@ -291,28 +293,6 @@ function initializeApp() {
   dom.saveSettingsBtn.addEventListener('click', saveSettings);
   dom.abortBtn.addEventListener('click', abortMission);
   dom.restartBtn.addEventListener('click', restartToSetup);
-  
-  // Preset selector cards
-  dom.presets.forEach(card => {
-    card.addEventListener('click', () => {
-      dom.presets.forEach(c => {
-        c.classList.remove('selected');
-        c.setAttribute('aria-checked', 'false');
-        c.setAttribute('tabindex', '-1');
-      });
-      card.classList.add('selected');
-      card.setAttribute('aria-checked', 'true');
-      card.setAttribute('tabindex', '0');
-    });
-    
-    // Keyboard support for preset buttons
-    card.addEventListener('keydown', (e) => {
-      if (e.key === ' ' || e.key === 'Enter') {
-        e.preventDefault();
-        card.click();
-      }
-    });
-  });
 
   // Modal overlay click close
   dom.settingsModal.addEventListener('click', (e) => {
@@ -446,13 +426,12 @@ async function onStartGame() {
   }
 
   const customTopic = dom.topicInput.value.trim();
-  let selectedPresetCard = null;
-  
-  dom.presets.forEach(c => {
-    if (c.classList.contains('selected')) {
-      selectedPresetCard = c.getAttribute('data-preset');
-    }
-  });
+  if (!customTopic) {
+    alert("Error: Please enter a battle topic / subject to deploy defenses!");
+    if (dom.topicInput) dom.topicInput.focus();
+    resetStartButton();
+    return;
+  }
 
   state.deck = [];
   state.answersRecord = [];
@@ -465,51 +444,48 @@ async function onStartGame() {
   resetEffects();
   updateHealthBars();
 
-  if (customTopic) {
-    state.activeTopic = customTopic;
-    dom.activeTopicDisplay.textContent = customTopic;
-    
-    // UI state to "Generating Deck"
-    dom.startBtn.innerHTML = `
-      <svg class="spinner" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="animation: spin 1s linear infinite; margin-right: 0.5rem;">
-        <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
-        <path d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z" fill="currentColor"></path>
-      </svg>
-      Analyzing Topic...
-    `;
-    
-    writeTerminalLog(`[SYSTEM] Initializing intelligence query for topic: "${customTopic}"...`, 'sys');
-    
-    try {
-      const generatedDeck = await fetchCustomDeckFromGemini(customTopic);
-      if (generatedDeck && generatedDeck.length > 0) {
-        state.deck = generatedDeck;
-      } else {
-        throw new Error("Invalid deck parsed from server response.");
-      }
-    } catch (err) {
-      console.error(err);
-      writeTerminalLog(`[ERROR] Secure connection failed: ${err.message}. Reverting to SG Trivia preset.`, 'dmg');
-      alert(`Failed to generate flashcards from Gemini: ${err.message}. Loading default Singapore Trivia deck instead.`);
-      state.deck = PRESETS.singapore;
-      state.activeTopic = "Singapore Trivia (Fallback)";
-      dom.activeTopicDisplay.textContent = state.activeTopic;
-    } finally {
-      dom.startBtn.disabled = false;
-      dom.startBtn.innerHTML = `
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
-        </svg>
-        Deploy Defenses
-      `;
+  state.activeTopic = customTopic;
+  dom.activeTopicDisplay.textContent = customTopic;
+  
+  // Show Lottie loading overlay
+  if (dom.loadingOverlay) {
+    dom.loadingOverlay.classList.remove('hidden');
+    if (dom.lottieContainer && typeof lottie !== 'undefined') {
+      dom.lottieContainer.innerHTML = '';
+      state.lottieInstance = lottie.loadAnimation({
+        container: dom.lottieContainer,
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        path: 'gemini_loading.json'
+      });
     }
-  } else {
-    // Preset load
-    state.activeTopic = selectedPresetCard === 'singapore' ? 'Singapore Trivia' : 
-                         selectedPresetCard === 'space' ? 'Space Exploration' : 'Web Development';
+  }
+  
+  writeTerminalLog(`[SYSTEM] Initializing intelligence query for topic: "${customTopic}"...`, 'sys');
+  
+  try {
+    const generatedDeck = await fetchCustomDeckFromGemini(customTopic);
+    if (generatedDeck && generatedDeck.length > 0) {
+      state.deck = generatedDeck;
+    } else {
+      throw new Error("Invalid deck parsed from server response.");
+    }
+  } catch (err) {
+    console.error(err);
+    writeTerminalLog(`[ERROR] Secure connection failed: ${err.message}. Reverting to SG Trivia preset.`, 'dmg');
+    alert(`Failed to generate flashcards from Gemini: ${err.message}. Loading default Singapore Trivia deck instead.`);
+    state.deck = PRESETS.singapore.slice(0, 5);
+    state.activeTopic = "Singapore Trivia (Fallback)";
     dom.activeTopicDisplay.textContent = state.activeTopic;
-    state.deck = PRESETS[selectedPresetCard] || PRESETS.singapore;
-    writeTerminalLog(`[SYSTEM] Loaded preset mission profile: "${state.activeTopic}".`, 'sys');
+  } finally {
+    // Hide and cleanup Lottie
+    if (dom.loadingOverlay) dom.loadingOverlay.classList.add('hidden');
+    if (state.lottieInstance) {
+      state.lottieInstance.destroy();
+      state.lottieInstance = null;
+    }
+    resetStartButton();
   }
 
   // Shuffle option choices dynamically on each game play to prevent rote learning of ABCD keys
@@ -555,7 +531,7 @@ async function fetchCustomDeckFromGemini(topic) {
           role: "user",
           parts: [
             {
-              text: `Generate exactly 10 high-quality, diverse flashcard questions for a multiple-choice quiz game on the requested topic: "${topic}". Ensure options are distinct, one is exactly correct, and explanations are concise (1-2 sentences).`
+              text: `Generate exactly 5 high-quality, diverse flashcard questions for a multiple-choice quiz game on the requested topic: "${topic}". Ensure options are distinct, one is exactly correct, and explanations are concise (1-2 sentences).`
             }
           ]
         }
