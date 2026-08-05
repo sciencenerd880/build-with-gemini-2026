@@ -1,12 +1,12 @@
 # SG Defender: Flashcard Battle Game
 
-A cyberpunk-themed, responsive single-page web application where players defend Singapore from a giant invading monster by answering flashcard questions. Powered by OpenAI's Chat Completions API for dynamic deck generation on any custom topic, with zero-setup offline presets available out of the box.
+A cyberpunk-themed, responsive single-page web application where players defend Singapore from a giant invading monster by answering flashcard questions. Powered by Google's Gemini API for dynamic deck generation on any custom topic, with zero-setup offline presets available out of the box.
 
 ![Gameplay Screenshot](screenshot.png)
 
 ## Features
 
-- **Custom Flashcard Generation:** Enter any topic (e.g. *Quantum Physics*, *Ancient Rome*, *Spanish Conjugations*) and your OpenAI API Key directly on the setup screen to play a custom-generated deck.
+- **Custom Flashcard Generation:** Enter any topic (e.g. *Quantum Physics*, *Ancient Rome*, *Spanish Conjugations*) and your Gemini API Key directly on the setup screen to play a custom-generated deck.
 - **Dynamic Combat System:** 
   - Correct answers fire a **cyan plasma laser** dealing 15 damage (or 25 critical damage for speed).
   - Incorrect answers/timeouts trigger a **monster fireball counter-attack** damaging your shields.

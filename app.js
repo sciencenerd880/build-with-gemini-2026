@@ -231,8 +231,8 @@ const dom = {
   settingsModal: document.getElementById('settings-modal'),
   closeModalBtn: document.getElementById('modal-close-btn'),
   saveSettingsBtn: document.getElementById('save-settings-btn'),
-  openaiKeyInput: document.getElementById('openai-key'),
-  setupOpenaiKey: document.getElementById('setup-openai-key'),
+  geminiKeyInput: document.getElementById('gemini-key'),
+  setupGeminiKey: document.getElementById('setup-gemini-key'),
   timerToggle: document.getElementById('timer-toggle'),
   
   // Battle Screen UI
@@ -269,10 +269,10 @@ const dom = {
 // Initial Setup
 function initializeApp() {
   // Load saved configurations
-  state.apiKey = localStorage.getItem('sg_defender_api_key') || '';
-  dom.openaiKeyInput.value = state.apiKey;
-  if (dom.setupOpenaiKey) {
-    dom.setupOpenaiKey.value = state.apiKey;
+  state.apiKey = localStorage.getItem('sg_defender_gemini_api_key') || '';
+  if (dom.geminiKeyInput) dom.geminiKeyInput.value = state.apiKey;
+  if (dom.setupGeminiKey) {
+    dom.setupGeminiKey.value = state.apiKey;
   }
   
   const savedTimer = localStorage.getItem('sg_defender_timer_enabled');
@@ -348,22 +348,22 @@ function handleKeyboardChoice(e) {
 // Modal handler
 function toggleModal(show) {
   if (show) {
-    dom.openaiKeyInput.value = state.apiKey;
+    if (dom.geminiKeyInput) dom.geminiKeyInput.value = state.apiKey;
     dom.settingsModal.classList.remove('hidden');
-    dom.openaiKeyInput.focus();
+    if (dom.geminiKeyInput) dom.geminiKeyInput.focus();
   } else {
     dom.settingsModal.classList.add('hidden');
   }
 }
 
 function saveSettings() {
-  state.apiKey = dom.openaiKeyInput.value.trim();
-  if (dom.setupOpenaiKey) {
-    dom.setupOpenaiKey.value = state.apiKey;
+  if (dom.geminiKeyInput) state.apiKey = dom.geminiKeyInput.value.trim();
+  if (dom.setupGeminiKey) {
+    dom.setupGeminiKey.value = state.apiKey;
   }
   state.timerEnabled = dom.timerToggle.checked;
   
-  localStorage.setItem('sg_defender_api_key', state.apiKey);
+  localStorage.setItem('sg_defender_gemini_api_key', state.apiKey);
   localStorage.setItem('sg_defender_timer_enabled', state.timerEnabled);
   
   writeTerminalLog(`[SYSTEM] Configuration updated. Timer: ${state.timerEnabled ? 'ENABLED' : 'DISABLED'}.`, 'sys');
@@ -388,22 +388,16 @@ function resetEffects() {
   dom.battleGraphics.classList.remove('shake-screen');
 }
 
-// Validate OpenAI API Key
-async function validateOpenAIKey(apiKey) {
-  const response = await fetch("https://api.openai.com/v1/models", {
-    method: "GET",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`
-    }
+// Validate Gemini API Key
+async function validateGeminiKey(apiKey) {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`, {
+    method: "GET"
   });
   
   if (!response.ok) {
-    if (response.status === 401) {
-      throw new Error("Unauthorized (Invalid Key)");
-    } else {
-      const errBody = await response.json().catch(() => ({}));
-      throw new Error(errBody.error?.message || `HTTP error ${response.status}`);
-    }
+    const errBody = await response.json().catch(() => ({}));
+    const errMsg = errBody.error?.message || `HTTP error ${response.status}`;
+    throw new Error(errMsg);
   }
   return true;
 }
@@ -421,16 +415,16 @@ function resetStartButton() {
 // Start Game Core Logic
 async function onStartGame() {
   // Enforce and read API key from setup screen
-  const keyInput = dom.setupOpenaiKey ? dom.setupOpenaiKey.value.trim() : '';
+  const keyInput = dom.setupGeminiKey ? dom.setupGeminiKey.value.trim() : '';
   if (!keyInput) {
-    alert("Error: An OpenAI API Key is required to deploy defenses! Please enter your key on the setup screen.");
-    if (dom.setupOpenaiKey) dom.setupOpenaiKey.focus();
+    alert("Error: A Gemini API Key is required to deploy defenses! Please enter your key on the setup screen.");
+    if (dom.setupGeminiKey) dom.setupGeminiKey.focus();
     return;
   }
   
   state.apiKey = keyInput;
-  localStorage.setItem('sg_defender_api_key', state.apiKey);
-  dom.openaiKeyInput.value = state.apiKey;
+  localStorage.setItem('sg_defender_gemini_api_key', state.apiKey);
+  if (dom.geminiKeyInput) dom.geminiKeyInput.value = state.apiKey;
 
   // Set button loading state
   dom.startBtn.disabled = true;
@@ -444,7 +438,7 @@ async function onStartGame() {
 
   // Validate API Key
   try {
-    await validateOpenAIKey(state.apiKey);
+    await validateGeminiKey(state.apiKey);
   } catch (err) {
     alert(`Error: API Key verification failed!\nDetails: ${err.message}`);
     resetStartButton();
@@ -487,7 +481,7 @@ async function onStartGame() {
     writeTerminalLog(`[SYSTEM] Initializing intelligence query for topic: "${customTopic}"...`, 'sys');
     
     try {
-      const generatedDeck = await fetchCustomDeckFromOpenAI(customTopic);
+      const generatedDeck = await fetchCustomDeckFromGemini(customTopic);
       if (generatedDeck && generatedDeck.length > 0) {
         state.deck = generatedDeck;
       } else {
@@ -496,7 +490,7 @@ async function onStartGame() {
     } catch (err) {
       console.error(err);
       writeTerminalLog(`[ERROR] Secure connection failed: ${err.message}. Reverting to SG Trivia preset.`, 'dmg');
-      alert(`Failed to generate flashcards from OpenAI: ${err.message}. Loading default Singapore Trivia deck instead.`);
+      alert(`Failed to generate flashcards from Gemini: ${err.message}. Loading default Singapore Trivia deck instead.`);
       state.deck = PRESETS.singapore;
       state.activeTopic = "Singapore Trivia (Fallback)";
       dom.activeTopicDisplay.textContent = state.activeTopic;
@@ -548,58 +542,50 @@ function shuffleArray(array) {
   return array;
 }
 
-// Fetch generated cards from OpenAI GPT-4o-mini using JSON schema structured outputs
-async function fetchCustomDeckFromOpenAI(topic) {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+// Fetch generated cards from Gemini gemini-3.5-flash using structured JSON output
+async function fetchCustomDeckFromGemini(topic) {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${state.apiKey}`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${state.apiKey}`
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: "You are an expert educator. Generate exactly 10 high-quality, diverse flashcard questions for a multiple-choice quiz game on the requested topic. Ensure options are distinct, one is exactly correct, and explanations are concise (1-2 sentences)."
-        },
+      contents: [
         {
           role: "user",
-          content: `Create 10 quiz questions on the topic: "${topic}".`
+          parts: [
+            {
+              text: `Generate exactly 10 high-quality, diverse flashcard questions for a multiple-choice quiz game on the requested topic: "${topic}". Ensure options are distinct, one is exactly correct, and explanations are concise (1-2 sentences).`
+            }
+          ]
         }
       ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "quiz_deck",
-          strict: true,
-          schema: {
-            type: "object",
-            properties: {
-              flashcards: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    question: { type: "string" },
-                    options: {
-                      type: "array",
-                      items: { type: "string" }
-                    },
-                    answer: { type: "string" },
-                    explanation: { type: "string" }
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "OBJECT",
+          properties: {
+            flashcards: {
+              type: "ARRAY",
+              items: {
+                type: "OBJECT",
+                properties: {
+                  question: { "type": "STRING" },
+                  options: {
+                    "type": "ARRAY",
+                    "items": { "type": "STRING" }
                   },
-                  required: ["question", "options", "answer", "explanation"],
-                  additionalProperties: false
-                }
+                  answer: { "type": "STRING" },
+                  explanation: { "type": "STRING" }
+                },
+                required: ["question", "options", "answer", "explanation"]
               }
-            },
-            required: ["flashcards"],
-            additionalProperties: false
-          }
-        }
-      },
-      temperature: 0.7
+            }
+          },
+          required: ["flashcards"]
+        },
+        temperature: 0.7
+      }
     })
   });
 
@@ -610,7 +596,8 @@ async function fetchCustomDeckFromOpenAI(topic) {
   }
 
   const json = await response.json();
-  const data = JSON.parse(json.choices[0].message.content);
+  const text = json.candidates[0].content.parts[0].text;
+  const data = JSON.parse(text);
   return data.flashcards;
 }
 
