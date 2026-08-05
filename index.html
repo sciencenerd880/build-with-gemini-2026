@@ -17,7 +17,7 @@
         <div id="header-lottie-icon"></div>
         <div class="brand-text">
           <h1 id="main-title">SG <span>DEFENDER</span></h1>
-          <span class="powered-by font-tech">POWERED BY <span class="gemini-gradient-text">GEMINI</span></span>
+          <span class="powered-by font-tech">POWERED BY <span class="gemini-gradient-text">GOOGLE AI</span></span>
         </div>
       </div>
       <div class="header-controls">
@@ -38,29 +38,13 @@
       <section id="setup-screen" class="panel setup-panel">
         <!-- Hero Header -->
         <div class="landing-hero">
-          <h2 class="hero-title font-tech">MISSION <span class="text-magenta">INITIALIZATION</span></h2>
+          <div class="title-with-info">
+            <h2 class="hero-title font-tech">MISSION <span class="text-magenta">INITIALIZATION</span></h2>
+            <button type="button" id="info-btn" class="info-btn" aria-label="Game Rules Info" title="View Combat Rules">ℹ️</button>
+          </div>
           <p class="hero-subtitle">
             Defend Singapore from Kaiju anomalies by answering 5 AI-generated battle flashcards!
           </p>
-        </div>
-
-        <!-- 3-Step Core Loop Stepper Cards -->
-        <div class="how-it-works-grid">
-          <div class="step-card">
-            <div class="step-icon">🎯</div>
-            <h4>1. Pick Topic</h4>
-            <p>Select preset chip or type custom subject</p>
-          </div>
-          <div class="step-card">
-            <div class="step-icon">🤖</div>
-            <h4>2. AI Deploys Deck</h4>
-            <p>Gemini generates 5 tactical questions</p>
-          </div>
-          <div class="step-card">
-            <div class="step-icon">⚡</div>
-            <h4>3. Laser Combat!</h4>
-            <p>Correct answers blast Kaiju invaders</p>
-          </div>
         </div>
 
         <!-- Topic Selection & Presets -->
@@ -373,6 +357,41 @@
       </div>
       
       <p id="loading-eta-text" style="color: var(--color-text-muted); font-size: 0.75rem; margin-top: 0.5rem; font-family: monospace;">ESTIMATED TIME REMAINING: ~4s</p>
+    </div>
+  </div>
+
+  <!-- Combat Rules Info Modal -->
+  <div id="info-modal" class="modal-overlay hidden">
+    <div class="modal-content info-modal-content">
+      <div class="modal-header">
+        <h3 class="font-tech" style="color: var(--color-cyan); font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+          ℹ️ COMBAT RULES & CORE LOOP
+        </h3>
+        <button type="button" id="info-modal-close" class="modal-close">&times;</button>
+      </div>
+      <div class="info-steps-list">
+        <div class="info-step-item">
+          <span class="info-step-icon">🎯</span>
+          <div>
+            <h4 style="color: var(--color-cyan); margin-bottom: 0.2rem; font-size: 0.9rem;">1. Select Battle Subject</h4>
+            <p style="color: var(--color-text-muted); font-size: 0.8rem; line-height: 1.35;">Click any preset chip or type a custom topic to generate your 5-card tactical deck.</p>
+          </div>
+        </div>
+        <div class="info-step-item">
+          <span class="info-step-icon">🤖</span>
+          <div>
+            <h4 style="color: var(--color-cyan); margin-bottom: 0.2rem; font-size: 0.9rem;">2. Gemini Deploys Deck</h4>
+            <p style="color: var(--color-text-muted); font-size: 0.8rem; line-height: 1.35;">Google Gemini AI synthesizes 5 custom combat flashcards in real time.</p>
+          </div>
+        </div>
+        <div class="info-step-item">
+          <span class="info-step-icon">⚡</span>
+          <div>
+            <h4 style="color: var(--color-cyan); margin-bottom: 0.2rem; font-size: 0.9rem;">3. Plasma Laser Combat</h4>
+            <p style="color: var(--color-text-muted); font-size: 0.8rem; line-height: 1.35;">Correct answers blast Kaiju invaders! Mistakes breach your defense shields.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

@@ -235,6 +235,9 @@ const dom = {
   restartBtn: document.getElementById('restart-btn'),
   settingsModal: document.getElementById('settings-modal'),
   closeModalBtn: document.getElementById('modal-close-btn'),
+  infoBtn: document.getElementById('info-btn'),
+  infoModal: document.getElementById('info-modal'),
+  infoModalClose: document.getElementById('info-modal-close'),
   saveSettingsBtn: document.getElementById('save-settings-btn'),
   geminiKeyInput: document.getElementById('gemini-key'),
   setupGeminiKey: document.getElementById('setup-gemini-key'),
@@ -328,6 +331,19 @@ function initializeApp() {
       toggleModal(false);
     }
   });
+
+  // Info Modal Listeners
+  if (dom.infoBtn && dom.infoModal) {
+    dom.infoBtn.addEventListener('click', () => dom.infoModal.classList.remove('hidden'));
+  }
+  if (dom.infoModalClose && dom.infoModal) {
+    dom.infoModalClose.addEventListener('click', () => dom.infoModal.classList.add('hidden'));
+  }
+  if (dom.infoModal) {
+    dom.infoModal.addEventListener('click', (e) => {
+      if (e.target === dom.infoModal) dom.infoModal.classList.add('hidden');
+    });
+  }
 
   // Keyboard controls for choices (1-4)
   window.addEventListener('keydown', handleKeyboardChoice);
