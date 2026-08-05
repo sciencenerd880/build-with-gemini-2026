@@ -289,6 +289,17 @@ function initializeApp() {
     state.highScores = JSON.parse(savedHighScores);
   }
 
+  // Initialize header Lottie icon
+  if (document.getElementById('header-lottie-icon') && typeof lottie !== 'undefined') {
+    lottie.loadAnimation({
+      container: document.getElementById('header-lottie-icon'),
+      renderer: 'svg',
+      loop: true,
+      autoplay: true,
+      path: 'gemini_loading.json'
+    });
+  }
+
   // Set up Event Listeners
   dom.startBtn.addEventListener('click', onStartGame);
   dom.settingsBtn.addEventListener('click', () => toggleModal(true));
@@ -296,6 +307,20 @@ function initializeApp() {
   dom.saveSettingsBtn.addEventListener('click', saveSettings);
   dom.abortBtn.addEventListener('click', abortMission);
   dom.restartBtn.addEventListener('click', restartToSetup);
+
+  // 1-Click Topic Preset Chips
+  const presetCards = document.querySelectorAll('.preset-card');
+  presetCards.forEach(card => {
+    card.addEventListener('click', () => {
+      presetCards.forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      const topic = card.getAttribute('data-topic');
+      if (topic && dom.topicInput) {
+        dom.topicInput.value = topic;
+        dom.topicInput.focus();
+      }
+    });
+  });
 
   // Modal overlay click close
   dom.settingsModal.addEventListener('click', (e) => {

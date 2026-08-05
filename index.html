@@ -13,7 +13,13 @@
   <div class="container">
     <!-- Header Area -->
     <header>
-      <h1 id="main-title">SG <span>DEFENDER</span></h1>
+      <div class="brand-container">
+        <div id="header-lottie-icon"></div>
+        <div class="brand-text">
+          <h1 id="main-title">SG <span>DEFENDER</span></h1>
+          <span class="powered-by font-tech">POWERED BY <span class="gemini-gradient-text">GEMINI</span></span>
+        </div>
+      </div>
       <div class="header-controls">
         <button id="settings-btn" class="btn btn-cyan" aria-label="Open Settings" title="Configure Gemini API Key">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
@@ -28,28 +34,88 @@
     <!-- Main Game Interface -->
     <main id="game-main" class="flex-grow">
       
-      <!-- 1. SETUP SCREEN -->
+      <!-- 1. SETUP SCREEN / LANDING PAGE -->
       <section id="setup-screen" class="panel setup-panel">
-        <h2 class="font-tech" style="color: var(--color-cyan); text-align: center; font-size: 1.6rem; margin-bottom: 0.5rem;">MISSION INITIALIZATION</h2>
-        <p style="text-align: center; color: var(--color-text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Configure defense parameters to intercept incoming anomaly.</p>
+        <!-- Hero Header & Badges -->
+        <div class="landing-hero">
+          <div class="badge-group">
+            <span class="hero-badge badge-cyan">⚡ Gemini AI Powered</span>
+            <span class="hero-badge badge-magenta">🎯 5-Card Boss Battles</span>
+            <span class="hero-badge badge-yellow">🛡️ Interactive Laser Combat</span>
+          </div>
+          <h2 class="hero-title font-tech">MISSION <span class="text-magenta">INITIALIZATION</span></h2>
+          <p class="hero-subtitle">
+            Defend Singapore from invading Kaiju anomalies by answering AI-generated flashcard questions!
+          </p>
+        </div>
 
-        <!-- Topic Selection -->
+        <!-- 3-Step Core Loop Stepper Cards -->
+        <div class="how-it-works-grid">
+          <div class="step-card">
+            <div class="step-number">01</div>
+            <div class="step-icon">🎯</div>
+            <h4>Pick Any Topic</h4>
+            <p>Type any subject or click a popular Singapore topic below.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-number">02</div>
+            <div class="step-icon">🤖</div>
+            <h4>AI Deploys Deck</h4>
+            <p>Gemini AI synthesizes 5 custom tactical questions in real time.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-number">03</div>
+            <div class="step-icon">⚡</div>
+            <h4>Laser Battle!</h4>
+            <p>Correct answers fire Plasma Lasers! Mistakes breach your shield.</p>
+          </div>
+        </div>
+
+        <!-- Topic Selection & Presets -->
         <div class="form-group">
-          <label for="topic-input">Battle Topic / Subject</label>
+          <div class="key-label-row" style="margin-bottom: 0.5rem;">
+            <label for="topic-input" style="margin: 0;">1. Select Battle Topic / Subject</label>
+            <span style="font-size: 0.75rem; color: var(--color-text-muted);">Select preset chip or type custom</span>
+          </div>
+          
+          <!-- 1-Click Topic Chips -->
+          <div class="presets-grid" id="presets-container">
+            <button type="button" class="preset-card" data-topic="Singlish & Local Slang">
+              <h4>🇸🇬 Singlish Slang</h4>
+              <p>Local lingo & terms</p>
+            </button>
+            <button type="button" class="preset-card" data-topic="Singapore History & Heritage">
+              <h4>🏛️ SG History</h4>
+              <p>Pioneers & milestones</p>
+            </button>
+            <button type="button" class="preset-card" data-topic="Singapore Hawker Food">
+              <h4>🍜 Hawker Culture</h4>
+              <p>Foodie trivia & dishes</p>
+            </button>
+            <button type="button" class="preset-card" data-topic="F1 Singapore Grand Prix">
+              <h4>🏎️ F1 Night Race</h4>
+              <p>Circuit history & cars</p>
+            </button>
+          </div>
+
           <input type="text" id="topic-input" class="form-input" placeholder="e.g. Singlish, Singapore History, F1 Grand Prix..." aria-required="true">
         </div>
 
         <!-- API Key Input -->
         <div class="form-group">
-          <label for="setup-gemini-key">Gemini API Key (Required)</label>
+          <div class="key-label-row">
+            <label for="setup-gemini-key">2. Gemini API Key (Required)</label>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="key-link">Get Free Key ↗</a>
+          </div>
           <input type="password" id="setup-gemini-key" class="form-input" placeholder="AIzaSy..." aria-required="true">
+          <p class="key-privacy-note">🔒 Stored locally in your browser LocalStorage. Never sent to external servers.</p>
         </div>
 
-        <button id="start-game-btn" class="btn btn-magenta" style="padding: 1rem; font-size: 1.1rem; justify-content: center; margin-top: 1rem;">
+        <button id="start-game-btn" class="btn btn-magenta start-btn">
           <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
           </svg>
-          Deploy Defenses
+          ENGAGE KAIJU & START BATTLE
         </button>
       </section>
 
