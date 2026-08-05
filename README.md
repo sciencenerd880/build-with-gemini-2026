@@ -6,7 +6,7 @@ A cyberpunk-themed, responsive single-page web application where players defend 
 
 ## Features
 
-- **Custom Flashcard Generation:** Enter any topic (e.g. *Quantum Physics*, *Ancient Rome*, *Spanish Conjugations*) and your Gemini API Key directly on the setup screen to play a custom-generated deck.
+- **Custom Flashcard Generation:** Enter any topic (e.g. *Quantum Physics*, *Ancient Rome*, *Spanish Conjugations*) and your Gemini API Key directly on the setup screen to play a custom-generated deck, powered by **`gemini-3.5-flash`** for structured JSON output.
 - **Dynamic Combat System:** 
   - Correct answers fire a **cyan plasma laser** dealing 15 damage (or 25 critical damage for speed).
   - Incorrect answers/timeouts trigger a **monster fireball counter-attack** damaging your shields.
