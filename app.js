@@ -507,37 +507,42 @@ async function onStartGame() {
   }
 
   // Initialize progress bar and dynamic status updates
-  let progress = 0;
-  let remainingSeconds = 4;
-  const totalDuration = 4000; // 4 seconds target
+  const startTime = Date.now();
+  const estimatedSeconds = 8; // Realistic average API generation time (~8s)
   const intervalTime = 100; // update every 100ms
+  let progress = 0;
   
   if (dom.loadingProgressBar) dom.loadingProgressBar.style.width = '0%';
   if (dom.loadingStatusText) dom.loadingStatusText.textContent = "CONNECTING TO GOOGLE AI STUDIO...";
-  if (dom.loadingEtaText) dom.loadingEtaText.textContent = `ESTIMATED TIME REMAINING: ~${remainingSeconds}s`;
+  if (dom.loadingEtaText) dom.loadingEtaText.textContent = `ESTIMATED TIME REMAINING: ~${estimatedSeconds}s`;
   
   const loadingInterval = setInterval(() => {
-    // Fill up to 90% linearly
-    if (progress < 90) {
-      progress += (90 / (totalDuration / intervalTime));
-      if (progress > 90) progress = 90;
-      if (dom.loadingProgressBar) dom.loadingProgressBar.style.width = `${progress}%`;
-      
-      // Update ETA
-      const currentRemaining = Math.max(0, Math.ceil(remainingSeconds - (progress / 90) * remainingSeconds));
+    const elapsedSec = (Date.now() - startTime) / 1000;
+    
+    if (elapsedSec < estimatedSeconds) {
+      // Smooth linear progress up to 90%
+      progress = (elapsedSec / estimatedSeconds) * 90;
+      const currentRemaining = Math.max(1, Math.ceil(estimatedSeconds - elapsedSec));
       if (dom.loadingEtaText) dom.loadingEtaText.textContent = `ESTIMATED TIME REMAINING: ~${currentRemaining}s`;
-      
-      // Rotate status messages
-      if (dom.loadingStatusText) {
-        if (progress < 25) {
-          dom.loadingStatusText.textContent = "CONNECTING TO GOOGLE AI STUDIO...";
-        } else if (progress < 60) {
-          dom.loadingStatusText.textContent = "QUERYING GEMINI-3.5-FLASH COGNITIVE CORE...";
-        } else if (progress < 85) {
-          dom.loadingStatusText.textContent = "GENERATING 5 TACTICAL FLASHCARDS...";
-        } else {
-          dom.loadingStatusText.textContent = "VALIDATING STRUCTURED JSON RESPONSE...";
-        }
+    } else {
+      // Beyond estimated time: crawl smoothly from 90% up to 98% (never freeze at ~0s)
+      const extraSec = elapsedSec - estimatedSeconds;
+      progress = 90 + Math.min(8, extraSec * 1.5);
+      if (dom.loadingEtaText) dom.loadingEtaText.textContent = "SYNCHRONIZING TACTICAL DATA...";
+    }
+    
+    if (dom.loadingProgressBar) dom.loadingProgressBar.style.width = `${progress}%`;
+    
+    // Rotate status messages based on current progress
+    if (dom.loadingStatusText) {
+      if (progress < 25) {
+        dom.loadingStatusText.textContent = "CONNECTING TO GOOGLE AI STUDIO...";
+      } else if (progress < 60) {
+        dom.loadingStatusText.textContent = "QUERYING GEMINI-3.5-FLASH COGNITIVE CORE...";
+      } else if (progress < 88) {
+        dom.loadingStatusText.textContent = "GENERATING 5 TACTICAL FLASHCARDS...";
+      } else {
+        dom.loadingStatusText.textContent = "VALIDATING STRUCTURED JSON RESPONSE...";
       }
     }
   }, intervalTime);
@@ -546,6 +551,9 @@ async function onStartGame() {
   
   try {
     const generatedDeck = await fetchCustomDeckFromGemini(customTopic);
+    const fetchDurationSec = ((Date.now() - startTime) / 1000).toFixed(2);
+    console.log(`[PERF] Gemini Deck Generation took ${fetchDurationSec} seconds.`);
+    
     if (generatedDeck && generatedDeck.length > 0) {
       state.deck = generatedDeck;
       
@@ -553,8 +561,8 @@ async function onStartGame() {
       clearInterval(loadingInterval);
       if (dom.loadingProgressBar) dom.loadingProgressBar.style.width = '100%';
       if (dom.loadingStatusText) dom.loadingStatusText.textContent = "DEPLOYMENT COMPLETE! WEAPONS ARMED.";
-      if (dom.loadingEtaText) dom.loadingEtaText.textContent = "TACTICAL INTERRUPT SUCCESSFUL!";
-      await new Promise(resolve => setTimeout(resolve, 250)); // short delay for visual impact
+      if (dom.loadingEtaText) dom.loadingEtaText.textContent = `SUCCESSFUL! (DECK LOADED IN ${fetchDurationSec}s)`;
+      await new Promise(resolve => setTimeout(resolve, 350)); // brief impact delay
     } else {
       throw new Error("Invalid deck parsed from server response.");
     }
