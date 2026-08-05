@@ -309,10 +309,10 @@ function initializeApp() {
   dom.restartBtn.addEventListener('click', restartToSetup);
 
   // 1-Click Topic Preset Chips
-  const presetCards = document.querySelectorAll('.preset-card');
-  presetCards.forEach(card => {
+  const presetChips = document.querySelectorAll('.preset-chip');
+  presetChips.forEach(card => {
     card.addEventListener('click', () => {
-      presetCards.forEach(c => c.classList.remove('selected'));
+      presetChips.forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
       const topic = card.getAttribute('data-topic');
       if (topic && dom.topicInput) {
